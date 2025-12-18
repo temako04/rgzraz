@@ -1,26 +1,23 @@
-name: CI
+name: CI/CD
 
 on:
   push:
     branches: [ "main" ]
     paths-ignore:
       - "changelog.md"
+  release:
+    types: [published]
 
 permissions:
   contents: write
 
 jobs:
-  ci:
+  tests-and-security:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (with tags)
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Fetch tags
-        run: git fetch --force --tags
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,13 +35,26 @@ jobs:
       - name: Bandit
         run: bandit -r . -x ./.github -ll
 
-      - name: Generate changelog.md
+  changelog:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Fetch tags
+        run: git fetch --force --tags
+
+      - name: Generate changelog.md for release tag
         run: |
           chmod +x scripts/generate_changelog.sh
-          VERSION="v0.0.${GITHUB_RUN_NUMBER}"
+          VERSION="${{ github.ref_name }}"
           ./scripts/generate_changelog.sh "$VERSION"
 
-      - name: Commit changelog.md
+      - name: Commit changelog.md to main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -55,5 +65,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Update changelog [skip ci]"
-          git push
+          git commit -m "Update changelog for ${{ github.ref_name }} [skip ci]"
+          git push origin HEAD:main
