@@ -3,6 +3,8 @@ name: CI
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - "changelog.md"
 
 permissions:
   contents: write
@@ -30,22 +32,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install Flask Werkzeug pytest bandit
 
-      # 1) unit-тесты
       - name: Run tests
         run: pytest -q
 
-      # 2) bandit
       - name: Bandit
         run: bandit -r . -x ./.github -ll
 
-      # 3) генерация changelog.md
       - name: Generate changelog.md
         run: |
           chmod +x scripts/generate_changelog.sh
           VERSION="v0.0.${GITHUB_RUN_NUMBER}"
           ./scripts/generate_changelog.sh "$VERSION"
 
-      # сохраняем changelog.md в main
       - name: Commit changelog.md
         run: |
           git config user.name "github-actions[bot]"
