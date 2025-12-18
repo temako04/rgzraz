@@ -25,8 +25,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          # Минимум для запуска app.py в тестах
+          pip install Flask Werkzeug
+          # Инструменты CI
           pip install pytest bandit
+          # Если requirements.txt есть — тоже установим (не мешает)
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
 
       # 1) Unit-тесты
       - name: Run unit tests
