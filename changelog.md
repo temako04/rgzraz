@@ -1,5 +1,8 @@
 ## [2.1] - 2025-12-18
 - Update ci-cd.yml [2de70c7](https://github.com/temako04/rgzraz/commit/2de70c7)
+## [4.1] - 2025-12-18
+- ПРОВЕРКА [fe0ce1d](https://github.com/temako04/rgzraz/commit/fe0ce1d)
+
 ## [3.1] - 2025-12-18
 - ПРОВЕРКА [1865af6](https://github.com/temako04/rgzraz/commit/1865af6)
 
