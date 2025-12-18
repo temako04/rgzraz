@@ -36,16 +36,13 @@ if ! git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
 fi
 
 # --- Находим предыдущий тег относительно текущего (по истории коммитов) ---
-# Берём коммит тега
 TAG_COMMIT="$(git rev-list -n 1 "${VERSION}")"
 PREV_TAG=""
-# Пытаемся найти ближайший тег до текущего тега
 if git describe --tags --abbrev=0 "${TAG_COMMIT}^" >/dev/null 2>&1; then
   PREV_TAG="$(git describe --tags --abbrev=0 "${TAG_COMMIT}^")"
 fi
 
 # --- Формируем диапазон коммитов ---
-# Если предыдущего тега нет — берём всё до текущего тега
 RANGE=""
 if [[ -n "$PREV_TAG" ]]; then
   RANGE="${PREV_TAG}..${VERSION}"
@@ -54,7 +51,6 @@ else
 fi
 
 # --- Получаем список коммитов для секции ---
-# Исключаем автокоммиты changelog и skip ci (чтобы не засоряли)
 COMMITS="$(git log ${RANGE} --pretty=format:'%h|%s' \
   | grep -v 'Update changelog' \
   | grep -v '\[skip ci\]' || true)"
@@ -64,9 +60,31 @@ if [[ -z "$COMMITS" ]]; then
   exit 0
 fi
 
-# --- Создаём файл changelog.md, если его нет ---
+# --- Создаём/нормализуем changelog.md, если надо ---
 if [[ ! -f "$CHANGELOG_FILE" ]]; then
   printf "# Changelog\n\n" > "$CHANGELOG_FILE"
+else
+  # Гарантируем корректную шапку: первая строка "# Changelog", вторая строка пустая
+  FIRST_LINE="$(head -n 1 "$CHANGELOG_FILE" || true)"
+  SECOND_LINE="$(sed -n '2p' "$CHANGELOG_FILE" || true)"
+
+  if [[ "$FIRST_LINE" != "# Changelog" ]]; then
+    TMP_FIX="$(mktemp)"
+    {
+      printf "# Changelog\n\n"
+      cat "$CHANGELOG_FILE"
+    } > "$TMP_FIX"
+    mv "$TMP_FIX" "$CHANGELOG_FILE"
+  else
+    if [[ -n "$SECOND_LINE" ]]; then
+      TMP_FIX="$(mktemp)"
+      {
+        printf "# Changelog\n\n"
+        tail -n +2 "$CHANGELOG_FILE"
+      } > "$TMP_FIX"
+      mv "$TMP_FIX" "$CHANGELOG_FILE"
+    fi
+  fi
 fi
 
 SECTION_HEADER="## [${VERSION}] - ${DATE}"
@@ -88,14 +106,21 @@ while IFS='|' read -r HASH SUBJECT; do
   fi
 done <<< "$COMMITS"
 
-# --- Вставляем новую секцию в начало (сразу после "# Changelog") ---
+# Убираем пустые строки из тела (чтобы не было “дыр”)
+SECTION_BODY="$(printf "%s" "$SECTION_BODY" | sed '/^[[:space:]]*$/d')"
+
+# --- Вставляем секцию сразу после "# Changelog" надёжно (без head/tail) ---
 TMP_FILE="$(mktemp)"
-{
-  head -n 2 "$CHANGELOG_FILE"
-  echo "${SECTION_HEADER}"
-  echo "${SECTION_BODY}"
-  tail -n +3 "$CHANGELOG_FILE"
-} > "$TMP_FILE"
+awk -v sec="${SECTION_HEADER}\n${SECTION_BODY}\n" '
+  NR==1 { print; next }
+  NR==2 {
+    # всегда после заголовка оставляем одну пустую строку, затем секцию
+    print ""
+    print sec
+    next
+  }
+  { print }
+' "$CHANGELOG_FILE" > "$TMP_FILE"
 mv "$TMP_FILE" "$CHANGELOG_FILE"
 
 echo "Changelog обновлён для версии ${VERSION} (диапазон: ${RANGE})"
