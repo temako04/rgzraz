@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Мои подписки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        h1 {
+            color: #333;
+            margin: 0;
+        }
+        .user-info {
+            color: #666;
+        }
+        .actions {
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-add {
+            background: #28a745;
+        }
+        .btn-add:hover {
+            background: #1e7e34;
+        }
+        .btn-logout {
+            background: #dc3545;
+        }
+        .btn-logout:hover {
+            background: #c82333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background-color: #6c757d;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-right: 5px;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+        .edit-btn {
+            background: #17a2b8;
+            color: white;
+        }
+        .edit-btn:hover {
+            background: #138496;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        .total {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 5px;
+        }
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Мои подписки</h1>
+                <p class="user-info">Пользователь: {{ username }}</p>
+            </div>
+            <div>
+                <a href="/logout" class="btn btn-logout">Выйти</a>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="/subscriptions/add" class="btn btn-add">Добавить подписку</a>
+        </div>
+        
+        {% if subscriptions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Сумма</th>
+                    <th>Период</th>
+                    <th>Дата начала</th>
+                    <th>Следующее списание</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in subscriptions %}
+                <tr>
+                    <td>{{ sub.name }}</td>
+                    <td>{{ "%.2f"|format(sub.amount) }} ₽</td>
+                    <td>
+                        {% if sub.interval == 'monthly' %}
+                            Ежемесячно
+                        {% elif sub.interval == 'yearly' %}
+                            Ежегодно
+                        {% elif sub.interval == 'weekly' %}
+                            Еженедельно
+                        {% else %}
+                            {{ sub.interval }}
+                        {% endif %}
+                    </td>
+                    <td>{{ sub.start_date }}</td>
+                    <td>{{ sub.next_charge_date }}</td>
+                    <td>
+                        <a href="/subscriptions/edit/{{ sub.id }}" class="action-btn edit-btn">Изменить</a>
+                        <a href="/subscriptions/delete/{{ sub.id }}" 
+                           class="action-btn delete-btn" 
+                           onclick="return confirm('Удалить {{ sub.name }}?')">Удалить</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="total">
+            <p><strong>Итого в месяц: {{ "%.2f"|format(total_monthly) }} ₽</strong></p>
+            <p>Всего активных подписок: {{ subscriptions|length }}</p>
+        </div>
+        
+        {% else %}
+        <div class="empty">
+            <h3>Нет активных подписок</h3>
+            <p>У вас пока нет ни одной активной подписки.</p>
+            <a href="/subscriptions/add" class="btn btn-add">Добавить первую подписку</a>
+        </div>
+        {% endif %}
+        
+        <div class="footer">
+            <p><a href="/">На главную</a></p>
+        </div>
+    </div>
+</body>
+</html>
