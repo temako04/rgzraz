@@ -1,5 +1,10 @@
 ## [v0.0.7] - 2025-12-18
 - Update ci-cd.yml [9fa04cf](https://github.com/temako04/rgzraz/commit/9fa04cf)
+## [v0.0.11] - 2025-12-18
+- ПРОВЕРКА [22aa6ee](https://github.com/temako04/rgzraz/commit/22aa6ee)
+- Update generate_changelog.sh [5f3c6c3](https://github.com/temako04/rgzraz/commit/5f3c6c3)
+- Update ci-cd.yml [11cfab5](https://github.com/temako04/rgzraz/commit/11cfab5)
+
 ## [v0.0.10] - 2025-12-18
 - Update generate_changelog.sh [5f3c6c3](https://github.com/temako04/rgzraz/commit/5f3c6c3)
 - Update ci-cd.yml [11cfab5](https://github.com/temako04/rgzraz/commit/11cfab5)
