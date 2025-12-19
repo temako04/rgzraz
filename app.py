@@ -61,9 +61,7 @@ def calculate_next_charge(start_date_str, interval):
 
 init_db()
 
-# ====================================
 # ФУНКЦИИ ПОЛЬЗОВАТЕЛЕЙ
-# ====================================
 
 def get_user_by_username(username):
     conn = get_db_connection()
@@ -92,9 +90,7 @@ def create_user(username, password):
     
     return success
 
-# ====================================
 # ДЕКОРАТОР
-# ====================================
 
 def login_required(f):
     @wraps(f)
@@ -104,9 +100,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# ====================================
 # АУТЕНТИФИКАЦИЯ
-# ====================================
 
 @app.route('/')
 def index():
@@ -161,9 +155,7 @@ def logout():
     session.clear()
     return redirect('/')
 
-# ====================================
 # ПОДПИСКИ
-# ====================================
 
 @app.route('/subscriptions')
 @login_required

@@ -17,7 +17,7 @@ fi
 DATE="$(date +%F)"
 CHANGELOG_FILE="changelog.md"
 
-# --- Определяем GitHub base URL (для ссылок на коммиты) ---
+# Определяем GitHub base URL (для ссылок на коммиты)
 REMOTE_URL="$(git config --get remote.origin.url || true)"
 BASE_URL=""
 
@@ -29,20 +29,20 @@ elif [[ "$REMOTE_URL" == https://github.com/* ]]; then
   BASE_URL="${REMOTE_URL%.git}"
 fi
 
-# --- Проверяем, что тег существует локально ---
+#  Проверяем, что тег существует локально 
 if ! git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
   echo "Ошибка: тег '${VERSION}' не найден. Убедись, что теги подтянуты: git fetch --tags"
   exit 1
 fi
 
-# --- Находим предыдущий тег относительно текущего (по истории коммитов) ---
+#  Находим предыдущий тег относительно текущего (по истории коммитов) 
 TAG_COMMIT="$(git rev-list -n 1 "${VERSION}")"
 PREV_TAG=""
 if git describe --tags --abbrev=0 "${TAG_COMMIT}^" >/dev/null 2>&1; then
   PREV_TAG="$(git describe --tags --abbrev=0 "${TAG_COMMIT}^")"
 fi
 
-# --- Формируем диапазон коммитов ---
+#  Формируем диапазон коммитов 
 RANGE=""
 if [[ -n "$PREV_TAG" ]]; then
   RANGE="${PREV_TAG}..${VERSION}"
@@ -50,7 +50,7 @@ else
   RANGE="${VERSION}"
 fi
 
-# --- Получаем список коммитов для секции ---
+# Получаем список коммитов для секции
 COMMITS="$(git log ${RANGE} --pretty=format:'%h|%s' \
   | grep -v 'Update changelog' \
   | grep -v '\[skip ci\]' || true)"
@@ -60,7 +60,7 @@ if [[ -z "$COMMITS" ]]; then
   exit 0
 fi
 
-# --- Создаём/нормализуем changelog.md, если надо ---
+# Создаём/нормализуем changelog.md, если надо 
 if [[ ! -f "$CHANGELOG_FILE" ]]; then
   printf "# Changelog\n\n" > "$CHANGELOG_FILE"
 else
@@ -109,7 +109,7 @@ done <<< "$COMMITS"
 # Убираем пустые строки из тела (чтобы не было “дыр”)
 SECTION_BODY="$(printf "%s" "$SECTION_BODY" | sed '/^[[:space:]]*$/d')"
 
-# --- Вставляем секцию сразу после "# Changelog" надёжно (без head/tail) ---
+# Вставляем секцию сразу после "# Changelog" надёжно (без head/tail)
 TMP_FILE="$(mktemp)"
 awk -v sec="${SECTION_HEADER}\n${SECTION_BODY}\n" '
   NR==1 { print; next }
