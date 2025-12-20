@@ -1,4 +1,8 @@
 # Changelog
+## [10.0.0] - 2025-12-20
+- generate_changelog (828011a) (https://github.com/temako04/rgzraz/commit/828011a49bd20885c04dd868407f46ca99aaeeac)
+
+
 ## [1] - 2025-12-20
 - Update generate_changelog.sh (https://github.com/temako04/rgzraz/commit/ba1616c9561fe33755c8b662d138e01edf49e67d)
 
