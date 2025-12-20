@@ -19,8 +19,8 @@ PREV_TAG=$(git describe --tags --abbrev=0 "$VERSION^" 2>/dev/null || true)
 RANGE="$VERSION"
 [[ -n "$PREV_TAG" ]] && RANGE="$PREV_TAG..$VERSION"
 
-# Получаем коммиты (исключая технические)
-COMMITS=$(git log "$RANGE" --pretty=format:"%h|%s" | grep -v "Update changelog\|\[skip ci\]" || true)
+# Получаем коммиты с полным хэшем, автором и датой
+COMMITS=$(git log "$RANGE" --pretty=format:"%H|%s|%an|%ad" --date=short | grep -v "Update changelog\|\[skip ci\]" || true)
 
 [[ -z "$COMMITS" ]] && echo "Нет коммитов" && exit 0
 
@@ -35,9 +35,17 @@ grep -q "^## \[$VERSION\]" "$CHANGELOG" && {
 
 # Генерируем секцию changelog
 SECTION="## [$VERSION] - $DATE\n"
-while IFS='|' read -r HASH MSG; do
-    [[ -z "$HASH" ]] && continue
-    SECTION+="- $MSG [$HASH]\n"
+while IFS='|' read -r FULL_HASH MSG AUTHOR COMMIT_DATE; do
+    [[ -z "$FULL_HASH" ]] && continue
+    
+    # Обрезаем хэш
+    SHORT_HASH="${FULL_HASH:0:7}"
+    
+    # Формируем ссылку в формате git://
+    COMMIT_URL="git://$(pwd)/.git/commit/$FULL_HASH"
+    
+    # Добавляем пункт с автором и датой
+    SECTION+="- $MSG [[$SHORT_HASH]]($COMMIT_URL) *by $Author on $COMMIT_DATE*\n"
 done <<< "$COMMITS"
 SECTION+="\n"
 
