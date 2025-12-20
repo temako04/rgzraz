@@ -34,20 +34,16 @@ grep -q "^## \[$VERSION\]" "$CHANGELOG" && {
 }
 
 # Генерируем секцию changelog
-SECTION="## [$VERSION] - $DATE\n"
-while IFS='|' read -r FULL_HASH MSG AUTHOR COMMIT_DATE; do
-    [[ -z "$FULL_HASH" ]] && continue
-    
-    # Обрезаем хэш
-    SHORT_HASH="${FULL_HASH:0:7}"
-    
-    # Формируем ссылку в формате git://
-    COMMIT_URL="git://$(pwd)/.git/commit/$FULL_HASH"
-    
-    # Добавляем пункт с автором и датой
-    SECTION+="- $MSG [[$SHORT_HASH]]($COMMIT_URL) *by $Author on $COMMIT_DATE*\n"
+SECTION_BODY=""
+while IFS='|' read -r HASH SUBJECT; do
+  [[ -z "${HASH}" || -z "${SUBJECT}" ]] && continue
+
+  if [[ -n "$BASE_URL" ]]; then
+    SECTION_BODY+="- ${SUBJECT} [${HASH}](${BASE_URL}/commit/${HASH})"$'\n'
+  else
+    SECTION_BODY+="- ${SUBJECT} [${HASH}]"$'\n'
+  fi
 done <<< "$COMMITS"
-SECTION+="\n"
 
 # Вставляем секцию после заголовка
 sed -i "1a\\"$'\n'"$SECTION" "$CHANGELOG"
