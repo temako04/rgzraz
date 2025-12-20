@@ -1,4 +1,9 @@
 # Changelog
+## [6.0] - 2025-12-20
+- Update generate_changelog.sh [b370d0a]
+- правки [648d551]
+
+
 
 ## [5.1] - 2025-12-18
 - Update generate_changelog.sh [1e30b26](https://github.com/temako04/rgzraz/commit/1e30b26)
