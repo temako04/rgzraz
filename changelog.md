@@ -1,4 +1,5 @@
 # Changelog
+
 ## [7.0] - 2025-12-20
 - Update generate_changelog.sh [[ffa928a]](git:///home/runner/work/rgzraz/rgzraz/.git/commit/ffa928a86ced0082b14c209a4745a79588619c3e) *by  on 2025-12-20*
 
